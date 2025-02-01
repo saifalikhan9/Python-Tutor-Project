@@ -11,6 +11,7 @@ import axios from 'axios';
 
 
 export const LessonView= () => {
+  const url = import.meta.env.VITE_API_URL;
   const { id } = useParams();
   const navigate = useNavigate();
   const [code, setCode] = useState('');
@@ -39,7 +40,7 @@ export const LessonView= () => {
     const currentCode = code || lessonContent.content;
 
     try {
-      const response = await axios.post('http://localhost:3000/api/execute', { code: currentCode });
+      const response = await axios.post(`${url}/api/execute`, { code: currentCode });
       setOutput(response.data.output);
 
       if (!response.data.error) {
@@ -58,7 +59,7 @@ export const LessonView= () => {
 
     setChatMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     try {
-      const response = await axios.post('http://localhost:3000/api/chat', {
+      const response = await axios.post(`${url}/api/chat`, {
         message: userMessage,
         code: code || lessonContent.content,
         lessonId: id,

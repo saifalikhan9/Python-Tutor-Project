@@ -5,12 +5,15 @@ import { python } from '@codemirror/lang-python';
 import { oneDark } from '@codemirror/theme-one-dark';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { vs2015 } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import axios from 'axios';
 
 
 
 export const Playground= () => {
+  const url = import.meta.env.VITE_API_URL
   const [code, setCode] = useState('# Welcome to your Python playground! 🐍\n# Try writing some code below:\n\nprint("Hello, Python friend!")\n\n# Try these fun examples:\n# 1. Make a calculation\n# print(2 + 2)\n\n# 2. Create a variable\n# name = "Your name"\n# print("Hello,", name)');
   const [output, setOutput] = useState('');
+  const [error, setError] = useState(null);
   const [chatMessages, setChatMessages] = useState([
     {
       role: 'assistant',
@@ -20,52 +23,43 @@ export const Playground= () => {
   const [userMessage, setUserMessage] = useState('');
   const [isRunning, setIsRunning] = useState(false);
 
+  
   const handleRunCode = async () => {
     setIsRunning(true);
+    setError(null)
+    const currentCode = code ;
+
     try {
-      // Simple simulation of Python code execution
-      let simulatedOutput = '';
-      if (code.includes('print')) {
-        const printMatches = code.match(/print\((.*?)\)/g);
-        if (printMatches) {
-          simulatedOutput = printMatches
-            .map(match => {
-              const content = match.slice(6, -1);
-              try {
-                // Safely evaluate simple expressions
-                if (content.startsWith('"') || content.startsWith("'")) {
-                  return content.slice(1, -1);
-                } else {
-                  return eval(content);
-                }
-              } catch {
-                return 'Error: Invalid expression';
-              }
-            })
-            .join('\n');
-        }
+      const response = await axios.post(`${url}/api/execute`, { code: currentCode });
+      setOutput(response.data.output);
+
+      if (!response.data.error) {
+        setChatMessages(prev => [...prev, { role: 'assistant', content: "Great job! Your code ran successfully." }]);
       }
-      
-      setOutput(simulatedOutput || 'No output generated');
-      
-      setChatMessages(prev => [...prev, {
-        role: 'assistant',
-        content: "Excellent work! 🎉 Your code ran perfectly! The print() function is used to show messages on the screen. What would you like to try next?"
-      }]);
-    } catch (error) {
-      setOutput('Error: Something went wrong while running your code. Please try again!');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred while running the code');
+      setOutput('Error: Failed to execute code. Please try again.');
     } finally {
       setIsRunning(false);
     }
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
+    const id = Math.floor(Math.random()*10);
     if (!userMessage.trim()) return;
 
-    setChatMessages(prev => [...prev, 
-      { role: 'user', content: userMessage },
-      { role: 'assistant', content: "That's a great question! Let me help you understand..." }
-    ]);
+    setChatMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    try {
+      const response = await axios.post(`${url}/api/chat`, {
+        message: userMessage,
+        code: code,
+        lessonId: JSON.stringify(id) ,
+        
+      });
+      setChatMessages(prev => [...prev, { role: 'assistant', content: response.data.response }]);
+    } catch (err) {
+      setChatMessages(prev => [...prev, { role: 'assistant', content: "I'm having trouble responding right now." }]);
+    }
     setUserMessage('');
   };
 
@@ -149,7 +143,7 @@ export const Playground= () => {
                 style={vs2015}
                 customStyle={{ background: 'transparent' }}
               >
-                {output || 'Run your code to see the output here! 🚀'}
+                {output === null ? error : output || 'Run your code to see the output here! 🚀'}
               </SyntaxHighlighter>
             </div>
           </div>
