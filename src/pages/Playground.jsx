@@ -45,7 +45,7 @@ export const Playground= () => {
   };
 
   const handleSendMessage = async () => {
-    const id = Math.floor(Math.random()*10);
+    
     if (!userMessage.trim()) return;
 
     setChatMessages(prev => [...prev, { role: 'user', content: userMessage }]);
@@ -53,11 +53,19 @@ export const Playground= () => {
       const response = await axios.post(`${url}/api/chat`, {
         message: userMessage,
         code: code,
-        lessonId: JSON.stringify(id) ,
+        context: 'playground',
+      
         
-      });
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      },);
       setChatMessages(prev => [...prev, { role: 'assistant', content: response.data.response }]);
     } catch (err) {
+      console.log(err);
+      
       setChatMessages(prev => [...prev, { role: 'assistant', content: "I'm having trouble responding right now." }]);
     }
     setUserMessage('');

@@ -1,36 +1,51 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Key } from "lucide-react";
+import { useApiKey } from "../context/ApiKeyContext.jsx";
 
-export const Settings= () => {
-  const [apiKey, setApiKey] = useState("");
-  const [newApiKey, setNewApiKey] = useState("");
+export const Settings = () => {
+  const { apiKey, setApiKey } = useApiKey();
+  const [newApiKey, setNewApiKey] = useState(apiKey);
   const url = import.meta.env.VITE_API_URL;
 
-  
+  const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`${url}/api/set_apikey`, {
-        apiKey: newApiKey,
-      });
-
+      const res = await axios.post(
+        `${url}/api/set_apikey`,
+        { apiKey: newApiKey },
+        {
+          withCredentials: true,
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
       setApiKey(newApiKey);
-      console.log(res.data);
-      
+      setNewApiKey("");
+      window.alert("API Key saved successfully");
+      navigate("/");
+
     } catch (error) {
-      console.log(error);
+      console.error("Error saving API Key:", error);
     }
   };
 
   const clearApiKey = async () => {
     try {
-      const res = await axios.delete(`${url}/api/delete_apikey`)
-      console.log(res.data);
-      setApiKey("")
+      const res = await axios.delete(`${url}/api/delete_apikey`, {
+        withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+     
+      setApiKey("");
     } catch (error) {
       console.log(error);
-      
     }
   };
 
