@@ -4,34 +4,30 @@ import { Brain, AlertCircle } from "lucide-react";
 import useAuth from "../hooks/useAuth";
 
 export const SignIn = () => {
- 
-  const { login, isLoading,isAuthenticated } = useAuth();
+  const { login, isLoading, isAuthenticated } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-
-
-  
   const handleSubmit = async (e) => {
-    
     e.preventDefault();
     setError("");
 
     try {
-      await login(username, password);
-      window.location.reload();
+      const res = await login(username, password);
+
+     console.log(res,"res Login");
+     
     } catch (err) {
       setError("Invalid username or password");
     }
   };
 
-   if (isAuthenticated) {
-      return <Navigate to="/" replace />;
-    }
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
-    
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
