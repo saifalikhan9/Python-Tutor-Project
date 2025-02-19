@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
+import {visualizer} from 'rollup-plugin-visualizer';
 
 export default defineConfig({
   plugins: [react()],
@@ -10,21 +11,20 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: "dist", // Output directory for the build
-    sourcemap: false, // Disable sourcemaps for production
+   
+    chunkSizeWarningLimit: 2000,
     rollupOptions: {
+      plugins: [
+        visualizer({
+          open: true, // Automatically open the visualization in the browser
+        }),
+      ],
       output: {
         manualChunks: {
-          vendor: ["react", "react-dom"],
+          vendor: ["@codemirror/lang-python","@codemirror/theme-one-dark","@uiw/react-codemirror","react-syntax-highlighter","lucide-react"],
         },
       },
     },
   },
-  server: {
-    port: 3000,
-    open: true,
-  },
-  define: {
-    "process.env": process.env,
-  },
+
 });
