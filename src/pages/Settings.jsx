@@ -27,7 +27,7 @@ export const Settings = () => {
       setApiKey(newApiKey);
       setNewApiKey("");
       window.alert("API Key saved successfully");
-      navigate("/");
+
 
     } catch (error) {
       console.error("Error saving API Key:", error);
@@ -48,6 +48,7 @@ export const Settings = () => {
       console.log(error);
     }
   };
+
 
   return (
     <div className="max-w-2xl mx-auto">

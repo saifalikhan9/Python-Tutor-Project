@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { Brain, AlertCircle } from "lucide-react";
-import useAuth from "../hooks/useAuth";
+import { useAuth } from "../context/AuthContext";
+import { useApiKey } from "../context/ApiKeyContext";
 
 export const SignIn = () => {
   const { login, isLoading, isAuthenticated } = useAuth();
+  const {apiKey,setApiKey} = useApiKey();  
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -15,17 +18,16 @@ export const SignIn = () => {
 
     try {
       const res = await login(username, password);
-
-     console.log(res,"res Login");
-     
+      if (res.status === 200) {
+        
+       
+      }
     } catch (err) {
       setError("Invalid username or password");
     }
   };
-
-  if (isAuthenticated) {
-    return <Navigate to="/" replace />;
-  }
+if (isAuthenticated) {
+    return <Navigate to="/" replace />; }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">

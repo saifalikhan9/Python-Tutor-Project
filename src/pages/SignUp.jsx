@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link ,useNavigate } from 'react-router-dom';
 import { Brain, AlertCircle } from 'lucide-react';
-import useAuth from "../hooks/useAuth";
+import { useAuth } from '../context/AuthContext';
 
 
 export const SignUp = () => {
